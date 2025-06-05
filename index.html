@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Data Assistant for DWRPT</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="login-container">
+    <header>
+      <img src="media/das-logo-header.png" alt="Ad Center Logo">
+      <br><br><br><br>
+      <h1>AI Data Assistant for DWRPT</h1>
+    </header>
+    <main>
+      <form class="login-form" id="askForm">
+        <textarea class="input-modern" id="textInput" rows="4" placeholder="Type something..."></textarea>
+        <button class="send-button" type="submit">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+               viewBox="0 0 24 24" stroke-width="1.5"
+               stroke="currentColor" class="send-icon">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
+          </svg>
+        </button>
+        <div id="response" style="margin-top: 1em;"></div>
+      </form>
+
+      <script>
+        document.getElementById('askForm').addEventListener('submit', async function (e) {
+          e.preventDefault(); // Impede o refresh da página
+          const input = document.getElementById('textInput').value.trim();
+          const responseDiv = document.getElementById('response');
+          responseDiv.innerText = "Loading...";
+
+          if (!input) {
+            responseDiv.innerText = "Please type something.";
+            return;
+          }
+
+          try {
+            const res = await fetch('http://localhost:7208/api/askmodel', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ question: input })
+            });
+
+            if (!res.ok) {
+              throw new Error(`Server error: ${res.status}`);
+            }
+
+            const data = await res.json();
+            responseDiv.innerText = data.response || data.Response || "No response received.";
+          } catch (err) {
+            responseDiv.innerText = "Error: " + err.message;
+          }
+        });
+      </script>
+    </main>
+  </div>
+</body>
+</html>
